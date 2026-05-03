@@ -56,7 +56,7 @@ class TestCapitaineAgent:
             destination="Cape Cod",
             crew_names=["Alice"],
             catch_summary="cod",
-            weather="sunny",
+            weather_conditions="sunny",
             incidents="",
             notes="",
         )

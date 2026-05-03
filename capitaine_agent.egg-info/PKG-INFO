@@ -6,7 +6,8 @@ Author-email: SuperInstance <cocapn@proton.me>
 License: MIT
 Keywords: plato,maritime,captain,fishing,voyage,crew
 Classifier: Development Status :: 4 - Beta
-Classifier: Intended Audience :: Maritime
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3.10
