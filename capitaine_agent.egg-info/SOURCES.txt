@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+capitaine_agent/__init__.py
+capitaine_agent/cli.py
+capitaine_agent.egg-info/PKG-INFO
+capitaine_agent.egg-info/SOURCES.txt
+capitaine_agent.egg-info/dependency_links.txt
+capitaine_agent.egg-info/entry_points.txt
+capitaine_agent.egg-info/requires.txt
+capitaine_agent.egg-info/top_level.txt
+tests/test_capitaine_agent.py

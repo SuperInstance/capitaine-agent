@@ -1,0 +1,2 @@
+[console_scripts]
+capitaine = capitaine_agent.cli:main
