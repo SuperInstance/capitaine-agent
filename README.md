@@ -41,3 +41,7 @@ Communicates with PLATO tile server at `http://localhost:8847`. Each voyage and 
 ## License
 
 MIT
+## Related
+
+- [capitaine.ai](https://capitaine.ai) — Live site
+- [capitaine-ai-pages](https://github.com/SuperInstance/capitaine-ai-pages) — GitHub Pages source
