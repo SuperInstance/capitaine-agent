@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify README.md exists and has ≥5 lines
+        run: |
+          if [ ! -f README.md ]; then
+            echo "ERROR: README.md not found"
+            exit 1
+          fi
+          lines=$(wc -l < README.md)
+          if [ "$lines" -lt 5 ]; then
+            echo "ERROR: README.md has only $lines lines, need ≥5"
+            exit 1
+          fi
+          echo "README.md OK ($lines lines)"
+
+      - name: Check for HTTP (non-HTTPS) links in README
+        run: |
+          http_links=$(grep -oP 'http://[^[:space:])<>"\'\`]+' README.md || true)
+          if [ -n "$http_links" ]; then
+            echo "ERROR: Found HTTP (non-HTTPS) links in README.md:"
+            echo "$http_links"
+            exit 1
+          fi
+          echo "No HTTP links found — all links use HTTPS"
