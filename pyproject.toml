@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "capitaine-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Captain's AI First Mate — voyage logging, crew coordination, maritime Q&A via PLATO"
 readme = "README.md"
 license = {text = "MIT"}
