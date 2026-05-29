@@ -53,6 +53,7 @@ pytest
 ```
 
 ## How It Fits
+- [OpenConstruct Documentation](https://github.com/SuperInstance/openconstruct-docs) — ecosystem-wide docs and guides
 
 Domain agent in the Cocapn Fleet. Works alongside `capitaine-ai` (crew orchestration engine) and `capitaineai-com-pages` (landing site).
 
