@@ -2,12 +2,12 @@
 
 **Captain's AI First Mate** for [capitaine.ai](https://capitaine.ai) — voyage logging, crew coordination, and maritime Q&A powered by PLATO.
 
-## Features
+## What This Gives You
 
-- **Voyage Logging**: Record departures, destinations, crew, catch, weather, and incidents
-- **Crew Coordination**: Log crew events (injuries, achievements, issues) with severity tracking
-- **Maritime Q&A**: Query PLATO for past maritime knowledge and similar incidents
-- **Status Overview**: Get a quick snapshot of vessel activity
+- **Voyage logging** — record departures, destinations, crew, catch, weather, and incidents
+- **Crew coordination** — log crew events with severity tracking
+- **Maritime Q&A** — query PLATO for past maritime knowledge and similar incidents
+- **CLI interface** — interactive voyage logger with `capitaine` command
 
 ## Installation
 
@@ -15,7 +15,7 @@
 pip install capitaine-agent
 ```
 
-## Usage
+## Quick Start
 
 ```bash
 # Interactive voyage logger
@@ -29,19 +29,33 @@ capitaine --qa "What incidents were logged near Cape Cod?"
 
 # Check vessel status
 capitaine --status
+```
 
-# View voyage history
-capitaine --history
+## Python API
+
+```python
+from capitaine_agent import log_voyage, log_crew_event, query_maritime
+
+log_voyage(departure="Boston Harbor", destination="Georges Bank", crew=5)
+log_crew_event("Alice", "injury", "slipped on deck", severity="moderate")
+results = query_maritime("weather delays Cape Cod")
 ```
 
 ## PLATO Integration
 
-Communicates with PLATO tile server at `http://localhost:8847`. Each voyage and crew event is logged as a tile in the `capitaine-ai` room.
+Each voyage and crew event is logged as a tile in the `capitaine-ai` room on the PLATO tile server (`localhost:8847`).
+
+## Testing
+
+```bash
+pip install -e .
+pytest
+```
+
+## How It Fits
+
+Domain agent in the Cocapn Fleet. Works alongside `capitaine-ai` (crew orchestration engine) and `capitaineai-com-pages` (landing site).
 
 ## License
 
 MIT
-## Related
-
-- [capitaine.ai](https://capitaine.ai) — Live site
-- [capitaine-ai-pages](https://github.com/SuperInstance/capitaine-ai-pages) — GitHub Pages source
