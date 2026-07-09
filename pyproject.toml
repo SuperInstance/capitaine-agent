@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "capitaine-agent"
 version = "0.2.0"
-description = "Captain's AI First Mate — voyage logging, crew coordination, maritime Q&A via PLATO"
+description = "Multi-agent coordination library — mission planning, crew delegation, tactical strategy scoring, and debrief reporting"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
     {name = "SuperInstance", email = "cocapn@proton.me"},
 ]
-keywords = ["plato", "maritime", "captain", "fishing", "voyage", "crew"]
+keywords = ["multi-agent", "coordination", "mission-planning", "crew", "delegation", "tactics", "orchestration"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
