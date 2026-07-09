@@ -312,11 +312,14 @@ pytest
 - **`capitaine.ai`:** reserved within this org for a future crew-coordination
   surface and deliberately **not built as a product yet**. Nothing in this
   repository should be read as "log into capitaine.ai and use this."
-- **Fleet context:** one domain agent in the Cocapn Fleet. Neighbors include
-  `tminus-dispatcher` (Temporal heartbeat), `fleet-bridge` (A2A transport),
-  `symphony-runtime` (grammar conductor), `composite-headspace` (dual-shell
-  mediator), and `i2i-bottle-agent` (bottle postmaster), per `AGENT.md`.
-  Ecosystem docs: [OpenConstruct Documentation](https://github.com/SuperInstance/openconstruct-docs).
+- **Fleet context, stated honestly:** this repo's `AGENT.md` carries an
+  inherited "Fleet Neighbors" table (`tminus-dispatcher`, `fleet-bridge`,
+  `symphony-runtime`, `composite-headspace`, `i2i-bottle-agent`). Those are
+  sketchbook design personas, **not verified integrations** — this package has
+  zero runtime dependencies and no code that talks to any of them. The same
+  caution applies as with PLATO above: a name appearing in prose is a design
+  intent, not a capability. Ecosystem background reading:
+  [OpenConstruct Documentation](https://github.com/SuperInstance/openconstruct-docs).
 
 ## License
 
