@@ -50,7 +50,11 @@ other objectives finishing first. An objective can carry **success criteria**
 than 5" or "the result must contain `ok`," so "is this step done?" is a real
 question with a real answer rather than a vibe. A mission can also carry
 **constraints** (`Constraint`) — boundary conditions ("finish under one hour",
-"stay in budget") it can be checked against.
+"stay in budget") it can be checked against. ⚠️ **The default
+`Constraint.evaluate()` is a stub** — it always returns `(True, "passed")`.
+The hook exists and is called by `Mission.check_constraints()`, but no
+built-in constraint does real evaluation. To get real checking you must
+subclass `Constraint` and override `evaluate`.
 
 Dependencies are the load-bearing idea. They are what let the captain ask "given
 what's finished, what's *ready to start* right now?" — the question at the heart
@@ -89,13 +93,24 @@ returns the strategies ranked, so the captain can ask for the single best
 missions, and provides the verbs that connect them:
 
 - `create_mission` / `add_goal` — build the goal graph.
+- `activate_mission(mission_id)` / `get_active_mission()` — set and query the
+  active mission. (Not re-exported from the top level; call on the agent
+  instance directly.)
 - `plan_mission(mission_id)` — turns the dependency graph into **waves**:
   batches of objectives whose dependencies are all satisfied, where everything
   in a batch can run in parallel and each batch must finish before the next.
   (A circular dependency is broken rather than deadlocking — the engine takes
   the first remaining objective and moves on.)
 - `delegate_objective` / `delegate_all_ready` — hand ready objectives to the
-  best-matching available crew member.
+  best-matching available crew member. **Implementation detail worth knowing:**
+  `delegate_objective` derives "required capabilities" by splitting the
+  objective's `description` into whitespace-separated words — so the words in
+  the description *are* the capability filter. If `description` is empty (as in
+  many of the examples above), no capability filtering happens and the engine
+  simply picks the available member with the highest `performance_score`.
+  There is no separate `required_capabilities` field on `Objective` today;
+  if you need precise capability matching, put the capability keywords in the
+  description.
 - `analyze_tactics` / `recommend_strategy` — read the situation and score
   strategies against it.
 - `status` — a JSON-serializable snapshot of the agent, its crew, and its
@@ -143,7 +158,7 @@ print(captain.debrief(mission.id).summary())
 This is the entire surface area of layer 1. Everything else in the library is a
 helper around these verbs.
 
-## Where PLATO fits (and where it doesn't, yet)
+## 🔮 Where PLATO fits (and where it doesn't, yet)
 
 Layer 2 — the *shared memory* half of the opening problem — is where **PLATO**
 comes in. PLATO is the fleet's name for a knowledge store that many agents are
@@ -171,6 +186,49 @@ Honest status, verified against the current source:
   shared-memory layer (layer 2) is an aspiration referenced in prose, not a
   feature you can call today. Treat any PLATO "integration" as a design intent,
   not a capability, until code for it lands.
+
+## Capability verification
+
+Every claim below was traced to working code and/or a passing test (76 tests,
+all green). Markers follow this org's convention:
+
+- ✅ **real today** — traced to working code
+- ⚠️ **real but conditional** — works, but needs something external
+- 🔮 **aspirational / later phase** — described as a direction, not implemented
+
+### ✅ Real today
+
+| Capability | Where in code |
+|------------|---------------|
+| Mission/Objective modeling with dependency graphs | `mission.py` — `Mission`, `Objective` |
+| `SuccessCriterion` with 6 comparators (eq, gt, lt, gte, lte, contains) | `mission.py` — tested in `TestSuccessCriterion` |
+| Wave-based dependency resolution (`plan_mission`) | `agent.py::plan_mission` — tested in `test_plan_mission` |
+| Circular-dependency break (takes first remaining, doesn't deadlock) | `agent.py::plan_mission` — the `if not wave` branch |
+| Crew roster: register, available, by_role, by_capability | `crew.py::CrewManager` |
+| `best_for_task` — filter by capabilities → highest performance | `crew.py::CrewManager.best_for_task` |
+| 6 built-in tactical strategies with weighted scoring | `tactics.py::TacticsEngine` — 6 `_score_*` methods |
+| `recommend` / `recommend_with_score` / `analyze_tactics` | `tactics.py` + `agent.py` |
+| Custom strategy registration (`register_strategy`) | `tactics.py::TacticsEngine` |
+| Delegation: `delegate_objective` / `delegate_all_ready` | `agent.py` — tested in `test_delegate_*` |
+| Debrief: outcomes, `success_rate`, `overall_score` (0.7×SR + 0.3×crew) | `debrief.py::DebriefReport` |
+| `DebriefReport.full_report()` / `lessons_learned` | `debrief.py` — tested in `test_full_report` |
+| CLI: 6 subcommands, stateless (no persistence) | `cli.py` |
+| `status()` — JSON-serializable agent snapshot | `agent.py::status` |
+
+### ⚠️ Real but conditional
+
+| Capability | Condition |
+|------------|-----------|
+| `Constraint.evaluate()` | The hook exists and `check_constraints` calls it, but the **default implementation always returns `(True, "passed")`**. Real checking requires subclassing and overriding `evaluate`. No built-in subclass exists. |
+| `AgentConfig.max_retries` | The field exists on `AgentConfig` and is tested for round-tripping, but **no retry logic uses it** anywhere in the codebase. It's a reserved config slot, not active behavior. |
+| Delegation capability matching | Works correctly, but matches on `description.split()` (whitespace words). An objective described as `"Build the base"` looks for capabilities `["Build", "the", "base"]` — case-sensitive, word-by-word. Use capability keywords in the description if you need precise matching. |
+
+### 🔮 Aspirational / later phase
+
+| Claimed direction | Status |
+|-------------------|--------|
+| PLATO shared-memory integration | No client, no network call, no `localhost:8847`, zero runtime dependencies. Referenced only in prose (`.spark/`, `AGENT.md`). See [Where PLATO fits](#where-plato-fits-and-where-it-doesnt-yet). |
+| `capitaine.ai` product surface | Domain reserved, deliberately not built as a product yet. |
 
 ## Installation
 
@@ -217,6 +275,22 @@ The public surface, re-exported from `capitaine_agent`:
 | `CrewManager`, `CrewMember` | The sub-agent roster (piece 2). |
 | `TacticsEngine`, `Strategy` | Strategy selection (piece 3). |
 | `DebriefReport`, `Outcome` | After-action rollup (piece 5). |
+
+The following methods are real and tested but **not re-exported at the top
+level** — import from the submodule or call them on an existing instance:
+
+| Where | Symbol | What it does |
+|-------|--------|-------------|
+| `TacticsEngine` | `recommend_with_score(ctx)` | Like `recommend` but also returns the numeric score. |
+| `TacticsEngine` | `register_strategy(s)` / `remove_strategy(name)` / `get_strategy(name)` | Add, remove, or look up a custom `Strategy`. A custom strategy's `suitability_fn` must match a built-in scorer name (`*_default`) to get a real score; otherwise it gets a flat 0.5. |
+| `Strategy` | `priority_boost` field | A float added on top of the suitability score — lets a custom strategy always win. |
+| `DebriefReport` | `full_report()` | Like `summary()` but includes the per-objective outcomes, `lessons_learned`, `crew_performance`, and `metadata`. |
+| `DebriefReport` | `add_lesson(text)` / `lessons_learned` | Record free-text after-action lessons. Populated by callers, not auto-derived. |
+| `Mission` | `check_constraints(ctx)` / `all_constraints_met(ctx)` | Evaluate every constraint; returns `(constraint, passed, message)` triples. |
+| `Mission` | `ready_objectives()` | Objectives whose dependencies are all `COMPLETED` and whose own status is `PLANNED`. Used internally by `delegate_all_ready`. |
+| `CrewManager` | `complete_task(member_id, success=)` | Mark a busy member's task done (success → available, failure → error). |
+| `CrewManager` | `roster()` | Full member list as dicts (id, name, role, status, capabilities, performance). |
+| `CrewMember` | `can_perform(cap)` / `clear_task()` / `mark_error()` | Capability check and lifecycle helpers. |
 
 Supporting types live in their modules and are imported from there
 (`AgentConfig` and `TacticalContext` are *not* re-exported at the top level):
